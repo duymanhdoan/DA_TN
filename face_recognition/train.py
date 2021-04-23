@@ -146,7 +146,8 @@ class FaceTrainer(object):
             batch_idx = 0 
             print('\n')
             self.print_and_log('started epoch:%d\n'%(epoch))
-            for (images, labels) in tqdm(self.data_loader, desc='started epoch: {}'.format(epoch)):
+            print('started epoch:%d\n'%(epoch))
+            for (images, labels) in self.data_loader:
                 
                 images = images.to(conf.device)
                 labels = labels.to(conf.device)
@@ -163,15 +164,19 @@ class FaceTrainer(object):
                     loss_avg = self.loss_meter.avg
                     lr = self.get_lr()
                     log = 'Epoch %d, iter %d/%d, lr %f, loss %f'%(epoch, batch_idx, len(self.data_loader), lr, loss_avg)
+                    print(log)
                     self.print_and_log(log)
                     self.writer.add_scalar('Train_loss', loss.item(), self.step_loop)
                     log = 'Train loss %f step %d'%(loss.item(), self.step_loop)
+                    print(log)
                     self.print_and_log(log)
                     self.writer.add_scalar('smooth_loss', loss_avg, self.step_loop)
                     self.writer.add_scalar('Train_lr', lr, self.step_loop)
                     log = 'Train_lr %f step %d'%(lr, self.step_loop)
+                    print(log)
                     self.print_and_log(log)
                     self.loss_meter.reset()
+
                 # test model 
                 if (batch_idx + 1) % conf.eval_by_batch_idx == 0 and batch_idx !=0: 
                     print('evaluating model in epoch: {} batch_id {}'.format(epoch,batch_idx))  
