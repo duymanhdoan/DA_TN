@@ -49,6 +49,7 @@ class ImageDataset(Dataset):
         
     def __len__(self):
         return len(self.train_list)
+        
     def __num_class__(self): 
         return self.num_class
 
