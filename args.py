@@ -8,3 +8,5 @@ score = True
 begin = 1
 duration = 0
 th = 0.1  #threshold of probility pnet mtcnn
+
+rec_path = 'faces_emore'

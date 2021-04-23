@@ -14,9 +14,9 @@ loss_type = 'ArcFace'   # help = "Mobilefacenets, Resnet."   support for type lo
 
 
 # ________________ training _____________________________
-data_root = '/home/duydm/Documents/F-Vision/face_recognition/trash/VN_celeb'  # path of data training
-batch_size = 4 # help evaluate dataset 
-epoches = 1  # number of epoch for training 
+data_root = '/media/minhdc/DATA/duydmFabbi/dataFace/faces_emore/imgs'  # path of data training
+batch_size = 64 # help evaluate dataset 
+epoches = 20  # number of epoch for training 
 step = '10, 13, 16'  # help = 'Step for schedule lr.'
 print_freq = 2  # help = 'The print frequency for training state.'
 save_freq = 10  # help = 'The save frequency for training state.'
@@ -30,16 +30,16 @@ momentum = 0.9  # help = 'The momentum for sgd.'
 lr = 0.1  # help='The initial learning rate.'
 # ___________________ evaluate dataset _______________________
 num_of_pair = 120
-root_eval_dataset = '/home/duydm/Documents/F-Vision/face_recognition/trash/VN_celeb'  # data with mask
+root_eval_dataset = '/home/duydm/Documents/dataset/VN_celeb'  # data with mask
 #root_eval_dataset = '/home/duydm/CodeProject/F-Vision/face_recognition/trash/VN_celeb'  # data without mask 
-evaluate_batch_size = 64  # batch size of evaluate
+evaluate_batch_size = 8  # batch size of evaluate
 
 # ______________________ work place output model _____________________________
 out_dir = 'Output_models'  # help = "The place of folder to save models log history training"
 log_dir = 'Output_models/history/'  # help = 'The directory to save log.log'
 tensorboardx_logdir = 'Output_models/tensorboard'  # help = 'The directory to save tensorboardx logs'
 #________________________ The path of pretrained model ____________________________________
-pretrain_model = '/home/duydm/Documents/Project_Diem_Danh/face_recognition/pretrained/resnet50ir/Epoch_17.pt' # resnet ir-se 152
+pretrain_model = '/home/duydm/Documents/DA_TN/pretrained/resnet50ir/Epoch_17.pt' # resnet ir-se 152
 
 # ______________________ define parametor of backbone and loss type __________________________________
 model_parameter = {'ResNet': 

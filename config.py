@@ -6,7 +6,7 @@ from torchvision import transforms as trans
 
 def get_config():
     conf = edict()
-    conf.data_path = Path('../TTTN/embedding')
+    conf.data_path = Path('/media/minhdc/DATA/duydmFabbi/dataFace/generator_datav2')
     conf.input_size = [112,112]
     conf.embedding_size = 512
     conf.use_mobilfacenet = True
@@ -21,7 +21,7 @@ def get_config():
                 ])
 
 
-    conf.pretrain_paths = Path('../TTTN/pretrained/model_mobilefacenet.pth')
+    conf.pretrain_paths = Path('')
     conf.tta = True
     conf.update = True
    
