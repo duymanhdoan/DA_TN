@@ -3,3 +3,5 @@ __pycache__
 Output_models
 config.py
 VN_celeb
+face_recognition/config.py
+train.txt

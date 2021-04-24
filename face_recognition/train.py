@@ -110,6 +110,7 @@ class FaceTrainer(object):
                 create_train_file(conf.data_root, conf.train_file)
             dataset = ImageDataset(conf.data_root, conf.train_file, conf.image_shape)
             self.num_class = conf.num_class = dataset.__num_class__()
+            print('num_class', self.num_class)
             self.data_loader = DataLoader(dataset, conf.batch_size, True, num_workers = 4, drop_last= True)
             # Define criterion loss 
             self.criterion = torch.nn.CrossEntropyLoss().to(conf.device)
