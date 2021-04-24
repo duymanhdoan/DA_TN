@@ -9,7 +9,7 @@ import torchvision.transforms as transforms
 import logging as logger
 
 
-def split_dataset(data_root): 
+def create_train_file(data_root, train_file): 
     """
     args: 
         data_root(str): path of root dataset
@@ -17,6 +17,7 @@ def split_dataset(data_root):
             train_list(list): list of path dataset
             num_class(int): number of class
     """
+    f = open(train_file, "w")
     train_list = []
     num_class = len(os.listdir(data_root))
     for class_name in os.listdir(data_root):
@@ -25,11 +26,11 @@ def split_dataset(data_root):
         fps_class_name = os.path.join(data_root, class_name)
         for image in os.listdir(fps_class_name):
             image_name = os.path.join(class_name, image) 
-            train_list.append((image_name, int(class_name)))
-
+            # train_list.append((image_name, int(class_name)))
+            f.write(image_name + " " + class_name + "\n")
     print('number of class train dataset ', num_class)
     print('number of data point train dataset', len(train_list))
-    return train_list, num_class
+    # return train_list, num_class
 
 
 class ImageDataset(Dataset):
@@ -41,9 +42,16 @@ class ImageDataset(Dataset):
             crop_eye(bool): crop eye(upper face) as input or not.
 
     """ 
-    def __init__(self, data_root, image_shape = (112,112), crop_eye=False):
+    def __init__(self, data_root, train_file, image_shape = (112,112), crop_eye=False):
         self.data_root = data_root
-        self.train_list, self.num_class = split_dataset(data_root)
+        self.train_list = []
+        self.num_class = len(os.listdir(self.data_root))
+        train_file_buf = open(train_file)
+        line = train_file_buf.readline().strip()
+        while line:
+            image_path, image_label = line.split(' ')
+            self.train_list.append((image_path, int(image_label)))
+            line = train_file_buf.readline().strip()
         self.crop_eye = crop_eye
         self.image_shape = image_shape
         

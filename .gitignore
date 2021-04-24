@@ -2,4 +2,4 @@ pretrained
 __pycache__
 Output_models
 config.py
-face_recognition/config.py
+VN_celeb

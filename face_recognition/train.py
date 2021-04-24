@@ -23,15 +23,25 @@ from prettytable import PrettyTable
 from dataset_utils.evaluator_dataset import Evaluator
 from dataset_utils.extractor_embedding import CommonExtractor 
 from dataset_utils.pairs_parser import PairsParserFactory
-from dataset_utils.train_dataset import ImageDataset, CommonTestDataset
+from dataset_utils.train_dataset import ImageDataset, CommonTestDataset, create_train_file
 from dataset_utils.module_eval import ModuleEval
 from utils.model_loader import ModelLoader 
 
 import time
 import config 
-import warnings
 
-warnings.filterwarnings("ignore", category=UserWarning)
+import warnings
+def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
+
+    log = file if hasattr(file,'write') else sys.stderr
+    traceback.print_stack(file=log)
+    log.write(warnings.formatwarning(message, category, filename, lineno, line))
+
+warnings.showwarning = warn_with_traceback
+
+# warnings.filterwarnings("ignore", category=UserWarning)
+
+
 
 logger.basicConfig(level=logger.INFO, 
                    format='%(levelname)s %(asctime)s %(filename)s: %(lineno)d] %(message)s',
@@ -67,6 +77,7 @@ class FaceTrainer(object):
     def __init__(self, conf, inference=False):
         if not os.path.exists(conf.log_dir): 
             os.makedirs(conf.log_dir)
+        self.conf = conf
         self.log_file_path = os.path.join(conf.log_dir, 'history_training_log.txt')
         # Load backbone 
         backbone_factory = BackboneFactory(conf.backbone_type, conf.model_parameter[conf.backbone_type])    
@@ -79,8 +90,8 @@ class FaceTrainer(object):
         print(' Load loss model', conf.loss_parameter[conf.loss_type])
         self.print_and_log(' Load backbone {}'.format(conf.model_parameter[conf.backbone_type]))
         self.print_and_log(' Load loss model {}'.format(conf.loss_parameter[conf.loss_type]))
-        
-        self.evaluator = ModuleEval(conf.root_eval_dataset,self.model,conf,gen_pair=True,status='train')
+        if conf.status_eval:
+            self.evaluator = ModuleEval(conf.root_eval_dataset,self.model,conf,gen_pair=True,status='train')
 
         if not inference: 
             self.step_loop = 0 
@@ -95,7 +106,9 @@ class FaceTrainer(object):
             self.writer = SummaryWriter(log_dir=tensorboardx_logdir)    
             # init history of train models 
             # Load data
-            dataset = ImageDataset(conf.data_root, conf.image_shape)
+            if not os.path.exists(conf.train_file): 
+                create_train_file(conf.data_root, conf.train_file)
+            dataset = ImageDataset(conf.data_root, conf.train_file, conf.image_shape)
             self.num_class = conf.num_class = dataset.__num_class__()
             self.data_loader = DataLoader(dataset, conf.batch_size, True, num_workers = 4, drop_last= True)
             # Define criterion loss 
@@ -129,8 +142,6 @@ class FaceTrainer(object):
         
     def print_and_log(self, string_to_write):
         with open(self.log_file_path, "a") as log_file:
-            # t = "[" + str(datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')) + "] " 
-            # log_file.write(t + string_to_write + "\n")
             log_file.write(string_to_write + '\n')
     
     def train(self, conf):
@@ -146,8 +157,7 @@ class FaceTrainer(object):
             batch_idx = 0 
             print('\n')
             self.print_and_log('started epoch:%d\n'%(epoch))
-            print('started epoch:%d\n'%(epoch))
-            for (images, labels) in self.data_loader:
+            for (images, labels) in tqdm(self.data_loader, desc='started epoch: {}'.format(epoch)):
                 
                 images = images.to(conf.device)
                 labels = labels.to(conf.device)
@@ -164,21 +174,18 @@ class FaceTrainer(object):
                     loss_avg = self.loss_meter.avg
                     lr = self.get_lr()
                     log = 'Epoch %d, iter %d/%d, lr %f, loss %f'%(epoch, batch_idx, len(self.data_loader), lr, loss_avg)
-                    print(log)
                     self.print_and_log(log)
                     self.writer.add_scalar('Train_loss', loss.item(), self.step_loop)
                     log = 'Train loss %f step %d'%(loss.item(), self.step_loop)
-                    print(log)
                     self.print_and_log(log)
                     self.writer.add_scalar('smooth_loss', loss_avg, self.step_loop)
                     self.writer.add_scalar('Train_lr', lr, self.step_loop)
                     log = 'Train_lr %f step %d'%(lr, self.step_loop)
-                    print(log)
                     self.print_and_log(log)
                     self.loss_meter.reset()
 
                 # test model 
-                if (batch_idx + 1) % conf.eval_by_batch_idx == 0 and batch_idx !=0: 
+                if (batch_idx + 1) % conf.eval_by_batch_idx == 0 and batch_idx !=0 and self.conf.status_eval: 
                     print('evaluating model in epoch: {} batch_id {}'.format(epoch,batch_idx))  
                     self.print_and_log('evaluating model in epoch: {} batch_id {}'.format(epoch,batch_idx))  
                     self.evaluator.eval()

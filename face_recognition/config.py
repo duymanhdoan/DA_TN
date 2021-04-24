@@ -14,32 +14,38 @@ loss_type = 'ArcFace'   # help = "Mobilefacenets, Resnet."   support for type lo
 
 
 # ________________ training _____________________________
-data_root = '/media/minhdc/DATA/duydmFabbi/dataFace/faces_emore/imgs'  # path of data training
+data_root = '/media/minhdc/DATA/duydmFabbi/dataFace/faces_emore/imgs'
+# data_root = '/home/duydm/Documents/DA_TN/face_recognition/VN_celeb'  # path of data training
+train_file = '/home/duydm/Documents/DA_TN/face_recognition/train.txt'
 batch_size = 64 # help evaluate dataset 
-epoches = 20  # number of epoch for training 
+epoches = 30  # number of epoch for training 
 step = '10, 13, 16'  # help = 'Step for schedule lr.'
-print_freq = 2  # help = 'The print frequency for training state.'
-save_freq = 10  # help = 'The save frequency for training state.'
-eval_by_batch_idx = 1    # number of step evaluate dataset 
+print_freq = 10  # help = 'The print frequency for training state.'
+save_freq = 1000  # help = 'The save frequency for training state.'
+eval_by_batch_idx = 1000    # number of step evaluate dataset 
 reload_model = True # help = 'Whether to resume from a checkpoint. load status model '
 num_class = 72778  #number of class
 feat_dim = 512 #shape of embedding
 image_shape = (112,112) # shape of image 
 num_workers = 4 #number of workers 
 momentum = 0.9  # help = 'The momentum for sgd.'
+status_eval = False
 lr = 0.1  # help='The initial learning rate.'
 # ___________________ evaluate dataset _______________________
-num_of_pair = 120
-root_eval_dataset = '/home/duydm/Documents/dataset/VN_celeb'  # data with mask
+num_of_pair = 120000
+data_root = '/media/minhdc/DATA/duydmFabbi/dataFace/faces_emore/imgs'
+# root_eval_dataset = '/home/duydm/Documents/dataset/VN_celeb'  # data with mask
 #root_eval_dataset = '/home/duydm/CodeProject/F-Vision/face_recognition/trash/VN_celeb'  # data without mask 
-evaluate_batch_size = 8  # batch size of evaluate
+evaluate_batch_size = 64  # batch size of evaluate
 
 # ______________________ work place output model _____________________________
 out_dir = 'Output_models'  # help = "The place of folder to save models log history training"
 log_dir = 'Output_models/history/'  # help = 'The directory to save log.log'
 tensorboardx_logdir = 'Output_models/tensorboard'  # help = 'The directory to save tensorboardx logs'
+result_test_file = '/home/duydm/CodeProject/DA_TN/Output_models/result.txt'
 #________________________ The path of pretrained model ____________________________________
-pretrain_model = '/home/duydm/Documents/DA_TN/pretrained/resnet50ir/Epoch_17.pt' # resnet ir-se 152
+pretrain_model = '/home/duydm/CodeProject/DA_TN/pretrained/resnet50ir/Epoch_17.pt'
+# pretrain_model = '/home/duydm/Documents/DA_TN/pretrained/resnet50ir/Epoch_17.pt' # resnet ir-se 152
 
 # ______________________ define parametor of backbone and loss type __________________________________
 model_parameter = {'ResNet': 
