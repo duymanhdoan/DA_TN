@@ -25,14 +25,12 @@ def create_train_file(data_root, train_file):
         if class_name.split('.')[-1] == 'txt':
             continue
         fps_class_name = os.path.join(data_root, class_name)
-        for image in os.listdir(fps_class_name):
-            image_name = os.path.join(class_name, image) 
-            # train_list.append((image_name, int(class_name)))
+        for image_name in os.listdir(fps_class_name):
             f.write(image_name + " " + class_name + "\n")
             data_point += 1
+
     print('number of class train dataset ', num_class)
     print('number of data point train dataset', data_point)
-
 
 class ImageDataset(Dataset):
     """ 
@@ -63,25 +61,24 @@ class ImageDataset(Dataset):
         return self.num_class
 
     def __getitem__(self, index):
-        image_path, image_label = self.train_list[index]
-        image_path = os.path.join(self.data_root, image_path)
-        image = cv2.imread(image_path)
-
-        if self.crop_eye:
-            image = image[:60, :]
-        
-        image = cv2.resize(image, self.image_shape) #128 * 128
-        
-        if random.random() > 0.5:
-            image = cv2.flip(image, 1)
-        
-        if image.ndim == 2:
-            image = image[:, :, np.newaxis]
-        # normalize the image
-        image = (image.transpose((2, 0, 1)) - 127.5) * 0.0078125
-        image = torch.from_numpy(image.astype(np.float32))
-        
-        return image, image_label
+        image_name, image_label = self.train_list[index]
+        image_path = str(self.data_root) + '/' + str(image_label) +'/'+ str(image_name)
+        if os.path.exists(image_path)
+            image = cv2.imread(image_path)
+            image = cv2.resize(image, self.image_shape) #128 * 128
+            if self.crop_eye:
+                image = image[:60, :]
+            if random.random() > 0.5:
+                image = cv2.flip(image, 1)
+            if image.ndim == 2:
+                image = image[:, :, np.newaxis]
+            # normalize the image
+            image = (image.transpose((2, 0, 1)) - 127.5) * 0.0078125
+            image = torch.from_numpy(image.astype(np.float32))
+            
+            return image, image_label
+        else: 
+            return None, None 
    
 class CommonTestDataset(Dataset):
     """ Data processor for model evaluation.
