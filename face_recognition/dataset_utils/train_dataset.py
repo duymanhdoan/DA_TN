@@ -7,7 +7,8 @@ from torch.utils.data import Dataset
 from torchvision.datasets import ImageFolder
 import torchvision.transforms as transforms
 import logging as logger
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 def create_train_file(data_root, train_file): 
     """
@@ -18,7 +19,7 @@ def create_train_file(data_root, train_file):
             num_class(int): number of class
     """
     f = open(train_file, "w")
-    train_list = []
+    data_point = 0
     num_class = len(os.listdir(data_root))
     for class_name in os.listdir(data_root):
         if class_name.split('.')[-1] == 'txt':
@@ -28,9 +29,9 @@ def create_train_file(data_root, train_file):
             image_name = os.path.join(class_name, image) 
             # train_list.append((image_name, int(class_name)))
             f.write(image_name + " " + class_name + "\n")
+            data_point += 1
     print('number of class train dataset ', num_class)
-    print('number of data point train dataset', len(train_list))
-    # return train_list, num_class
+    print('number of data point train dataset', data_point)
 
 
 class ImageDataset(Dataset):

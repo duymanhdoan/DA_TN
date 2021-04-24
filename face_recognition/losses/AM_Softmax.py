@@ -2,7 +2,8 @@
 import torch
 import torch.nn.functional as F
 from torch.nn import Module, Parameter
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 class AM_Softmax(Module):
     """Implementation for "Additive Margin Softmax for Face Verification"
     """

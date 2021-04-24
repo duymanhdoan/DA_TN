@@ -9,6 +9,8 @@ import logging as logger
 import numpy as np
 import torch
 from tqdm import tqdm 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 logger.basicConfig(level=logger.INFO, 
                    format='%(levelname)s %(asctime)s %(filename)s: %(lineno)d] %(message)s',
                    datefmt='%Y-%m-%d %H:%M:%S')

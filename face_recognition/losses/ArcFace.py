@@ -4,7 +4,8 @@ import math
 import torch
 import torch.nn.functional as F
 from torch.nn import Module, Parameter
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 class ArcFace(Module):
     """Implementation for "ArcFace: Additive Angular Margin Loss for Deep Face Recognition"
     """

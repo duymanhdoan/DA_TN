@@ -8,7 +8,8 @@ from backbone.backbone_def import BackboneFactory
 from dataset_utils.module_eval import ModuleEval
 from prettytable import PrettyTable
 import config as conf
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 if __name__ == '__main__':
     backbone_parametor = conf.model_parameter[conf.backbone_type]  
     backbone_factory = BackboneFactory(conf.backbone_type, backbone_parametor) 

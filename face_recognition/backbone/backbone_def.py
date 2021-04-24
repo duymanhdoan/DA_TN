@@ -3,6 +3,8 @@ import sys
 sys.path.append('../../')
 from backbone.ResNets import Resnet
 from backbone.MobileFaceNets import MobileFaceNet
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 class BackboneFactory:
     """Factory to produce backbone according the backbone_conf.yaml.

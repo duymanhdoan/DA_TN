@@ -1,6 +1,8 @@
 
 from torch.nn import Linear, Conv2d, BatchNorm1d, BatchNorm2d, PReLU, Sequential, Module 
 import torch 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 class Flatten(Module): 
     def forward(self, input): 
@@ -81,7 +83,8 @@ class MobileFaceNet(Module):
         self.linear = Linear(512, embedding_size, bias=False)
         self.bn = BatchNorm1d(embedding_size)
     
-    def forward(self, x):
+    import warnings
+warnings.filterwarnings("ignore", category=UserWarning)def forward(self, x):
         out = self.conv1(x)
         out = self.conv2_dw(out)
         out = self.conv_23(out)

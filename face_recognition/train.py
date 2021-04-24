@@ -29,19 +29,8 @@ from utils.model_loader import ModelLoader
 
 import time
 import config 
-
 import warnings
-def warn_with_traceback(message, category, filename, lineno, file=None, line=None):
-
-    log = file if hasattr(file,'write') else sys.stderr
-    traceback.print_stack(file=log)
-    log.write(warnings.formatwarning(message, category, filename, lineno, line))
-
-warnings.showwarning = warn_with_traceback
-
-# warnings.filterwarnings("ignore", category=UserWarning)
-
-
+warnings.filterwarnings("ignore", category=UserWarning)
 
 logger.basicConfig(level=logger.INFO, 
                    format='%(levelname)s %(asctime)s %(filename)s: %(lineno)d] %(message)s',

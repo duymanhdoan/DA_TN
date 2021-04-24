@@ -6,7 +6,8 @@
 import os 
 import scipy.io as scio
 from abc import ABCMeta, abstractmethod
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 class PairsParser(metaclass=ABCMeta):
     """Parse the pair list for lfw based protocol.

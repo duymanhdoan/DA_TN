@@ -10,11 +10,10 @@ from dataset_utils.evaluator_dataset import Evaluator
 from torch.utils.data import DataLoader
 from pathlib import Path 
 import time
-import warnings
 from prettytable import PrettyTable
 from backbone.backbone_def import BackboneFactory 
 from utils.model_loader import ModelLoader 
-
+import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 

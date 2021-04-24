@@ -8,6 +8,8 @@ import os
 import sys
 import numpy as np
 import math 
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 class Evaluator(object):
     """Implementation of LFW test protocal.
     

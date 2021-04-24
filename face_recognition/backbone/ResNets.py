@@ -5,7 +5,8 @@ from torch.nn import Linear, Conv2d, BatchNorm1d, BatchNorm2d, PReLU, ReLU, Sigm
 import torch.nn.functional as F
 import torch
 from collections import namedtuple
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 
 class Flatten(Module):
     def forward(self, input):

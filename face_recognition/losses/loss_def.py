@@ -3,7 +3,8 @@ import sys
 sys.path.append('../../')
 from losses.AM_Softmax import AM_Softmax
 from losses.ArcFace import ArcFace
-
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
 class LossFactory:
     """Factory to produce head according to the head_conf.yaml
     
