@@ -63,7 +63,7 @@ class ImageDataset(Dataset):
     def __getitem__(self, index):
         image_name, image_label = self.train_list[index]
         image_path = str(self.data_root) + '/' + str(image_label) +'/'+ str(image_name)
-        if os.path.exists(image_path)
+        if os.path.exists(image_path):
             image = cv2.imread(image_path)
             image = cv2.resize(image, self.image_shape) #128 * 128
             if self.crop_eye:

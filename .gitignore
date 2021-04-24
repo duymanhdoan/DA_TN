@@ -4,3 +4,4 @@ Output_models
 VN_celeb
 train.txt
 abc 
+face_recognition/config.py
