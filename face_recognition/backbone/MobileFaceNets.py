@@ -83,8 +83,7 @@ class MobileFaceNet(Module):
         self.linear = Linear(512, embedding_size, bias=False)
         self.bn = BatchNorm1d(embedding_size)
     
-    import warnings
-warnings.filterwarnings("ignore", category=UserWarning)def forward(self, x):
+    def forward(self, x):
         out = self.conv1(x)
         out = self.conv2_dw(out)
         out = self.conv_23(out)
