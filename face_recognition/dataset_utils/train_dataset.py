@@ -62,23 +62,22 @@ class ImageDataset(Dataset):
 
     def __getitem__(self, index):
         image_name, image_label = self.train_list[index]
-        image_path = str(self.data_root) + '/' + str(image_label) +'/'+ str(image_name)
-        if os.path.exists(image_path):
-            image = cv2.imread(image_path)
-            image = cv2.resize(image, self.image_shape) #128 * 128
-            if self.crop_eye:
-                image = image[:60, :]
-            if random.random() > 0.5:
-                image = cv2.flip(image, 1)
-            if image.ndim == 2:
-                image = image[:, :, np.newaxis]
-            # normalize the image
-            image = (image.transpose((2, 0, 1)) - 127.5) * 0.0078125
-            image = torch.from_numpy(image.astype(np.float32))
-            
-            return image, image_label
-        else: 
-            return None, None 
+        image_path = str(self.data_root) + '/' +str(image_label) +'/'+ str(image_name)
+        image = cv2.imread(image_path)
+        if self.crop_eye:
+            image = image[:60, :]
+        image = cv2.resize(image, self.image_shape) #128 * 128
+        
+        if random.random() > 0.5:
+            image = cv2.flip(image, 1)
+        
+        if image.ndim == 2:
+            image = image[:, :, np.newaxis]
+        # normalize the image
+        image = (image.transpose((2, 0, 1)) - 127.5) * 0.0078125
+        image = torch.from_numpy(image.astype(np.float32))
+        
+        return image, image_label
    
 class CommonTestDataset(Dataset):
     """ Data processor for model evaluation.

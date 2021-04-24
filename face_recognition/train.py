@@ -63,12 +63,20 @@ class FaceModel(torch.nn.Module):
         return pred
     
 class FaceTrainer(object): 
-    def __init__(self, conf, inference=False):
+    def __init__(self, conf):
         if not os.path.exists(conf.log_dir): 
             os.makedirs(conf.log_dir)
         self.conf = conf
         self.log_file_path = os.path.join(conf.log_dir, 'history_training_log.txt')
         # Load backbone 
+        # Load data
+        if not os.path.exists(conf.train_file): 
+            create_train_file(conf.data_root, conf.train_file)
+        dataset = ImageDataset(conf.data_root, conf.train_file, conf.image_shape)
+        self.num_class = conf.num_class = dataset.__num_class__()
+        print('num_class', self.num_class)
+
+        self.data_loader = DataLoader(dataset, conf.batch_size, True, num_workers = 4, drop_last= True)
         backbone_factory = BackboneFactory(conf.backbone_type, conf.model_parameter[conf.backbone_type])    
         # Load losses
         loss_factory = LossFactory(conf.loss_type, conf.loss_parameter[conf.loss_type])
@@ -81,34 +89,25 @@ class FaceTrainer(object):
         self.print_and_log(' Load loss model {}'.format(conf.loss_parameter[conf.loss_type]))
         if conf.status_eval:
             self.evaluator = ModuleEval(conf.root_eval_dataset,self.model,conf,gen_pair=True,status='train')
+        self.step_loop = 0 
+        # init tensorboard writer history and paramenters 
+        if not os.path.exists(conf.out_dir):
+            os.makedirs(conf.out_dir)
+        if not os.path.exists(conf.log_dir):
+            os.makedirs(conf.log_dir)
+        tensorboardx_logdir = os.path.join(conf.log_dir, conf.tensorboardx_logdir)
+        
+        print('path of tensorboard: ', tensorboardx_logdir)
+        self.writer = SummaryWriter(log_dir=tensorboardx_logdir)    
+        # init history of train models
+        # Define criterion loss 
+        self.criterion = torch.nn.CrossEntropyLoss().to(conf.device)
 
-        if not inference: 
-            self.step_loop = 0 
-            # init tensorboard writer history and paramenters 
-            if not os.path.exists(conf.out_dir):
-                os.makedirs(conf.out_dir)
-            if not os.path.exists(conf.log_dir):
-                os.makedirs(conf.log_dir)
-            tensorboardx_logdir = os.path.join(conf.log_dir, conf.tensorboardx_logdir)
-            
-            print('path of tensorboard: ', tensorboardx_logdir)
-            self.writer = SummaryWriter(log_dir=tensorboardx_logdir)    
-            # init history of train models 
-            # Load data
-            if not os.path.exists(conf.train_file): 
-                create_train_file(conf.data_root, conf.train_file)
-            dataset = ImageDataset(conf.data_root, conf.train_file, conf.image_shape)
-            self.num_class = conf.num_class = dataset.__num_class__()
-            print('num_class', self.num_class)
-            self.data_loader = DataLoader(dataset, conf.batch_size, True, num_workers = 4, drop_last= True)
-            # Define criterion loss 
-            self.criterion = torch.nn.CrossEntropyLoss().to(conf.device)
-
-            # init optimizer lr_schedule and loss_meter     
-            parameters = [p for p in self.model.parameters() if p.requires_grad]
-            self.optimizer = optim.SGD(parameters, lr = conf.lr, momentum = conf.momentum, weight_decay = 1e-4)
-            self.lr_schedule = optim.lr_scheduler.MultiStepLR(self.optimizer, milestones = conf.milestones, gamma = 0.1)
-            self.loss_meter = AverageMeter()
+        # init optimizer lr_schedule and loss_meter     
+        parameters = [p for p in self.model.parameters() if p.requires_grad]
+        self.optimizer = optim.SGD(parameters, lr = conf.lr, momentum = conf.momentum, weight_decay = 1e-4)
+        self.lr_schedule = optim.lr_scheduler.MultiStepLR(self.optimizer, milestones = conf.milestones, gamma = 0.1)
+        self.loss_meter = AverageMeter()
                 
 
     def load_state(self, conf, load_optimizer =False): 
