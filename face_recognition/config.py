@@ -2,16 +2,12 @@ import torch
 
 # _____________________________invironment training (cuda:0 , cpu)_________________________ 
 device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
-
 # metric 
 distance_metric = 0 # 0 is euclidian distance \ 1 is consin similarity. 
-
 
 #_________________ defind backbone __________________ 
 backbone_type =  'ResNet'    # ['ir', 'ir_se'], 'mode should be ir or ir_se' ,[50, 100, 152], 'num_layers should be 50,100, or 152'
 loss_type = 'ArcFace'   # help = "Mobilefacenets, Resnet."   support for type loss "mv-softmax, arcface, npc-face."
-
-
 # ________________ training _____________________________
 
 data_root = '/media/minhdc/DATA/duydmFabbi/dataFace/faces_emore/imgs'
@@ -32,12 +28,9 @@ momentum = 0.9  # help = 'The momentum for sgd.'
 status_eval = False
 lr = 0.1  # help='The initial learning rate.'
 # ___________________ evaluate dataset _______________________
-
 num_of_pair = 120000
-
 root_eval_dataset = '/home/duydm/CodeProject/DA_TN/pretrained/VN_celeb'  # data without mask 
 evaluate_batch_size = 64  # batch size of evaluate
-
 # ______________________ work place output model _____________________________
 out_dir = 'Output_models'  # help = "The place of folder to save models log history training"
 log_dir = 'Output_models/history/'  # help = 'The directory to save log.log'
