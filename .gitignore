@@ -1,7 +1,6 @@
 pretrained
 __pycache__
-Output_models
-config.py
+Output_models   
 VN_celeb
-face_recognition/config.py
 train.txt
+abc 
