@@ -11,16 +11,16 @@ import pickle
 import torch
 import mxnet as mx
 from tqdm import tqdm
-import os
 
 def de_preprocess(tensor):
     return tensor*0.5 + 0.5
-
-def get_train_dataset(imgs_folder):
+    
+def get_train_dataset(imgs_folder, image_shape):
     train_transform = trans.Compose([
         trans.RandomHorizontalFlip(),
         trans.ToTensor(),
-        trans.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+        trans.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        trans.Resize(image_shape)
     ])
     ds = ImageFolder(imgs_folder, train_transform)
     print('load dataset then check number of class {} -> type of ds {}'.format(ds[-1][1] + 1, ds ))
@@ -28,39 +28,18 @@ def get_train_dataset(imgs_folder):
     return ds, class_num
 
 def get_train_loader(conf):
-    if conf.data_mode in ['ms1m', 'concat']:
-        ms1m_ds, ms1m_class_num = get_train_dataset(conf.ms1m_folder)
-        print('ms1m loader generated')
-    if conf.data_mode in ['vgg', 'concat']:
-        vgg_ds, vgg_class_num = get_train_dataset(conf.vgg_folder)
-        print('vgg loader generated')
-    if conf.data_mode == 'vgg':
-        ds = vgg_ds
-        class_num = vgg_class_num
-    elif conf.data_mode == 'ms1m':
-        ds = ms1m_ds
-        class_num = ms1m_class_num
-    elif conf.data_mode == 'concat':
-        for i,(url,label) in enumerate(vgg_ds.imgs):
-            vgg_ds.imgs[i] = (url, label + ms1m_class_num)
-        ds = ConcatDataset([ms1m_ds,vgg_ds])
-        class_num = vgg_class_num + ms1m_class_num
-    elif conf.data_mode == 'emore':        
-        ds, class_num = get_train_dataset(conf.emore_folder)
-    elif conf.data_mode == 'vn_celeb': 
-        ds, class_num = get_train_loader(conf.evaluate_dataset)
-    loader = DataLoader(ds, batch_size=conf.batch_size, shuffle=True, pin_memory=conf.pin_memory, num_workers=conf.num_workers)
-    return loader, class_num
-
-
+ 
+    ds, class_num = get_train_dataset(conf.emore_folder/'imgs', conf.input_size)
+    loader = DataLoader(ds, batch_size=conf.batch_size, shuffle=True, pin_memory=conf.pin_memory, drop_last=False,num_workers=conf.num_workers)
+    
+    print('class number of dataset',class_num)
+    return loader, class_num 
+    
 def load_bin(path, rootdir, transform, image_size=[112,112]):
-
-    if not os.path.exists(rootdir):
-        os.mkdir(rootdir)
-
+    if not rootdir.exists():
+        rootdir.mkdir()
     bins, issame_list = pickle.load(open(path, 'rb'), encoding='bytes')
     data = bcolz.fill([len(bins), 3, image_size[0], image_size[1]], dtype=np.float32, rootdir=rootdir, mode='w')
-
     for i in range(len(bins)):
         _bin = bins[i]
         img = mx.image.imdecode(_bin).asnumpy()
@@ -70,24 +49,23 @@ def load_bin(path, rootdir, transform, image_size=[112,112]):
         i += 1
         if i % 1000 == 0:
             print('loading bin', i)
+    print(data.shape)
     np.save(str(rootdir)+'_list', np.array(issame_list))
     return data, issame_list
 
 def get_val_pair(path, name):
-    carray = bcolz.carray(rootdir = os.path.join(path,name), mode='r')
-    issame = np.load(os.path.join(path,'{}_list.npy'.format(name)))
+    carray = bcolz.carray(rootdir = path/name, mode='r')
+    issame = np.load(path/'{}_list.npy'.format(name))
     return carray, issame
 
-def get_val_data(data_path):
-    agedb_30, agedb_30_issame = get_val_pair(data_path, 'agedb_30')
-    cfp_fp, cfp_fp_issame = get_val_pair(data_path, 'cfp_fp')
-    lfw, lfw_issame = get_val_pair(data_path, 'lfw')
-    return agedb_30, cfp_fp, lfw, agedb_30_issame, cfp_fp_issame, lfw_issame
+def get_val_data(data_path, data_type):
+    data, issame = get_val_pair(data_path, data_type)
+    return carray, issame
 
 def load_mx_rec(rec_path):
-    save_path = os.path.join(rec_path,'imgs')
-    if not os.path.exists(save_path):
-        os.mkdir(save_path)
+    save_path = rec_path/'imgs'
+    if not save_path.exists():
+        save_path.mkdir()
     imgrec = mx.recordio.MXIndexedRecordIO(str(rec_path/'train.idx'), str(rec_path/'train.rec'), 'r')
     img_info = imgrec.read_idx(0)
     header,_ = mx.recordio.unpack(img_info)
@@ -97,7 +75,41 @@ def load_mx_rec(rec_path):
         header, img = mx.recordio.unpack_img(img_info)
         label = int(header.label)
         img = Image.fromarray(img)
-        label_path = os.path.join(save_path,str(label))
-        if not os.path.exists(label_path):
-            os.mkdir(label_path)
+        label_path = save_path/str(label)
+        if not label_path.exists():
+            label_path.mkdir()
         img.save(label_path/'{}.jpg'.format(idx), quality=95)
+
+if __name__ == '__main__': 
+
+    ds, class_num = get_train_dataset('/home/duydm/Documents/InsightFace_Pytorch/faces_emore/imgs', (112,112))
+    loader = DataLoader(ds, batch_size=8, shuffle=True, pin_memory=True, num_workers=4)
+    
+    print('class number of dataset',class_num)
+    for imgs, labels in loader: 
+        print(imgs.shape, labels.shape)
+# class train_dataset(Dataset):
+#     def __init__(self, imgs_bcolz, label_bcolz, h_flip=True):
+#         self.imgs = bcolz.carray(rootdir = imgs_bcolz)
+#         self.labels = bcolz.carray(rootdir = label_bcolz)
+#         self.h_flip = h_flip
+#         self.length = len(self.imgs) - 1
+#         if h_flip:
+#             self.transform = trans.Compose([
+#                 trans.ToPILImage(),
+#                 trans.RandomHorizontalFlip(),
+#                 trans.ToTensor(),
+#                 trans.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+#             ])
+#         self.class_num = self.labels[-1] + 1
+        
+#     def __len__(self):
+#         return self.length
+    
+#     def __getitem__(self, index):
+#         img = torch.tensor(self.imgs[index+1], dtype=torch.float)
+#         label = torch.tensor(self.labels[index+1], dtype=torch.long)
+#         if self.h_flip:
+#             img = de_preprocess(img)
+#             img = self.transform(img)
+#         return img, label

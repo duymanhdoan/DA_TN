@@ -1,131 +1,161 @@
+# InsightFace_Pytorch
 
-# Face Recognition base
+Pytorch0.4.1 codes for InsightFace
 
- 
-# How to use 
-- Clone
-```
-git clone https://github.com/duymanhdoan/DA_TN.git
-```
-# Configure 
+------
 
-## prepared dataset for training
+## 1. Intro
 
-Use dataset by stucture path to sub folder. Provide the face images your want to training the dataset/sub_foler/image. In [config.py](../face_recognition/config.py) 
+- This repo is a reimplementation of Arcface[(paper)](https://arxiv.org/abs/1801.07698), or Insightface[(github)](https://github.com/deepinsight/insightface)
+- For models, including the pytorch implementation of the backbone modules of Arcface and MobileFacenet
+- Codes for transform MXNET data records in Insightface[(github)](https://github.com/deepinsight/insightface) to Image Datafolders are provided
+- Pretrained models are posted, include the [MobileFacenet](https://arxiv.org/abs/1804.07573) and IR-SE50 in the original paper
 
-And guarantee it have a structure like following:
-```
-data_root/
-        sub-class1/
-                img1.jpg
-                img2.jpg
-                img3.jpg
-        sub-class2/
-                img1.jpg
-                img2.jpg
-                img3.jpg
-        sub-class3/
-                img1.jpg
-                img2.jpg
-                img3.jpg
+------
 
-``` 
-## Configure the backbone 
-Edit the configuration in [config.py](../face_recognition/config.py). More detailed description about the configuration can be found in [backbone_def.py](../face_recognition/backbone/backbone_def.py).   You can be found like this:  
+## 2. Pretrained Models & Performance
 
-```
-model_parameter = {'ResNet': 
-                      {'depth': 50,   # 50,100, or 152'
-                      'drop_ratio': 0.4, 
-                      'net_mode': 'ir',  # ['ir', 'ir_se']
-                      'feat_dim': feat_dim, 
-                      'out_h': 7, 
-                      'out_w': 7},
+[IR-SE50 @ BaiduNetdisk](https://pan.baidu.com/s/12BUjjwy1uUTEF9HCx5qvoQ), [IR-SE50 @ Onedrive](https://1drv.ms/u/s!AhMqVPD44cDOhkPsOU2S_HFpY9dC)
 
-                     'MobileFaceNet': 
-                      {'feat_dim': feat_dim, 
-                      'out_h': 7, 
-                      'out_w': 7 }
-                      } 
+| LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | calfw(%) | cplfw(%) | vgg2_fp(%) |
+| ------ | --------- | --------- | ----------- | -------- | -------- | ---------- |
+| 0.9952 | 0.9962    | 0.9504    | 0.9622      | 0.9557   | 0.9107   | 0.9386     |
+
+[Mobilefacenet @ BaiduNetDisk](https://pan.baidu.com/s/1hqNNkcAjQOSxUjofboN6qg), [Mobilefacenet @ OneDrive](https://1drv.ms/u/s!AhMqVPD44cDOhkSMHodSH4rhfb5u)
+
+| LFW(%) | CFP-FF(%) | CFP-FP(%) | AgeDB-30(%) | calfw(%) | cplfw(%) | vgg2_fp(%) |
+| ------ | --------- | --------- | ----------- | -------- | -------- | ---------- |
+| 0.9918 | 0.9891    | 0.8986    | 0.9347      | 0.9402   | 0.866    | 0.9100     |
+
+## 3. How to use
+
+- clone
+
+  ```
+  git clone https://github.com/TropComplique/mtcnn-pytorch.git
+  ```
+
+### 3.1 Data Preparation
+
+#### 3.1.1 Prepare Facebank (For testing over camera or video)
+
+Provide the face images your want to detect in the data/face_bank folder, and guarantee it have a structure like following:
 
 ```
-## Configure the loss model 
-Edit the configure the loss in [config.py](../face_recognition/config.py). More detailed description about the configuration can be found in [losses_def.py](../face_recognition/losses/loss_def.py).   You can be found like this: 
-
-```
-loss_parameter = {'ArcFace':
-                        {'feat_dim': feat_dim,
-                        'num_class': num_class,
-                        'margin_arc': 0.35,
-                        'margin_am': 0.0,
-                        'scale': 32},
-                    'AM-Softmax':
-                        {'feat_dim': feat_dim,
-                        'num_class': num_class,
-                        'margin': 0.35,
-                        'scale': 32}
-                    } 
-
-```
-## we evaluate use dataset VN-celeb (not public)
-
-The structure of dataset evaluate foler following like this: 
-```
-data_root_eval/ 
-            sub_class1/
-                    img1
-                    img2
-                    img3
-            sub_class2/
-                    img1
-                    img2
-                    img3
-            sub_class3/
-                    img1
-                    img2
-                    img3
+data/facebank/
+        ---> id1/
+            ---> id1_1.jpg
+        ---> id2/
+            ---> id2_1.jpg
+        ---> id3/
+            ---> id3_1.jpg
+           ---> id3_2.jpg
 ```
 
-After you define in config.py file . You change the backbone and loss_type in bellow.  
+#### 3.1.2 download the pretrained model to work_space/model
+
+If more than 1 image appears in one folder, an average embedding will be calculated
+
+#### 3.2.3 Prepare Dataset ( For training)
+
+download the refined dataset: (emore recommended)
+
+- [emore dataset @ BaiduDrive](https://pan.baidu.com/s/1eXohwNBHbbKXh5KHyItVhQ), [emore dataset @ Dropbox](https://www.dropbox.com/s/wpx6tqjf0y5mf6r/faces_ms1m-refine-v2_112x112.zip?dl=0)
+- More Dataset please refer to the [original post](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo)
+
+**Note:** If you use the refined [MS1M](https://arxiv.org/abs/1607.08221) dataset and the cropped [VGG2](https://arxiv.org/abs/1710.08092) dataset, please cite the original papers.
+
+- after unzip the files to 'data' path, run :
+
+  ```
+  python prepare_data.py
+  ```
+
+  after the execution, you should find following structure:
+
 ```
-#_________________ defind backbone __________________ 
-
-backbone_type =  'ResNet'    # ['ir', 'ir_se'], 'mode should be ir or ir_se' ,[50, 100, 152], 'num_layers should be 50,100, or 152'
-loss_type = 'ArcFace'   # help = "Mobilefacenets, Resnet."   support for type loss "mv-softmax, arcface, npc-face."
-```
-## modify of work place for outputs models
-You can modify [config.py](../face_recognition/config.py) for workplace of model. Load pretrained, history training, and log in tensorboard. 
-
-```
-# ______________________ work place output model _____________________________
-
-out_dir = '../Output_models/history/weights'  # help = "The place of folder to save models log history training"
-log_dir = '../Output_models/history/log'  # help = 'The directory to save log.log'
-pretrain_model = '../mobilefacenet/Epoch_17.pt' # help = 'The path of pretrained model'
-tensorboardx_logdir = 'tensorboard'  # help = 'The directory to save tensorboardx logs'
-
-```
-# Training mode 
-Using this command.
-``` 
-python3 face_recognition/train.py
-```
-# Evaluate 
-
-Using this command.
-```
-python3 face_recognition/test_eval.py
+faces_emore/
+            ---> agedb_30
+            ---> calfw
+            ---> cfp_ff
+            --->  cfp_fp
+            ---> cfp_fp
+            ---> cplfw
+            --->imgs
+            ---> lfw
+            ---> vgg2_fp
 ```
 
+------
 
-# Pretrained 
-You can download pretrain model 
-| Backbone | LFW | CPLFW | CALFW | AgeDb | MegaFace | Params | Macs | Models&Logs |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| [MobileFaceNet](https://arxiv.org/abs/1804.07573)   | 99.57 | 83.33 | 93.82 | 95.97 | 90.39 | 1.19M | 227.57M | [Google](https://drive.google.com/drive/folders/1v8G_y4JzoVaxXGlt3iLtd6TIk0GYwA2c?usp=sharing),[Baidu](https://pan.baidu.com/s/1RqBkIqd3zCdpUO50DHpOIw):bmpn |
-| [Resnet50-ir](https://arxiv.org/abs/1512.03385)     | 99.78 | 88.20 | 95.47 | 97.77 | 96.67 | 43.57M | 6.31G | [Google](https://drive.google.com/drive/folders/1s1O5YcoFFy5godV1velyIwq_CcXDXUrz?usp=sharing),[Baidu](https://pan.baidu.com/s/1W7LAAQ9jtA9jojpsrjI1Fg):8ecq |
-| [Resnet152-irse](https://arxiv.org/abs/1709.01507)  | 99.85 | 89.72 | 95.56 | 98.13 | 97.48 | 71.14M | 12.33G | [Google](https://drive.google.com/drive/folders/1FzXobevacaQ-Y1NAhMjTKZCP3gu4I3ni?usp=sharing),[Baidu](https://pan.baidu.com/s/10Fhgn9fjjtqPLXgrYTaPlA):2d0c |
+### 3.2 detect over camera:
 
-# Inferences
-- [Facex-zoo](https://github.com/JDAI-CV/FaceX-Zoo/tree/main/training_mode)
-- [InsightFace_Pytorch](https://github.com/TreB1eN/InsightFace_Pytorch)
+- 1. download the desired weights to model folder:
+
+- [IR-SE50 @ BaiduNetdisk](https://pan.baidu.com/s/12BUjjwy1uUTEF9HCx5qvoQ)
+- [IR-SE50 @ Onedrive](https://1drv.ms/u/s!AhMqVPD44cDOhkPsOU2S_HFpY9dC)
+- [Mobilefacenet @ BaiduNetDisk](https://pan.baidu.com/s/1hqNNkcAjQOSxUjofboN6qg)
+- [Mobilefacenet @ OneDrive](https://1drv.ms/u/s!AhMqVPD44cDOhkSMHodSH4rhfb5u)
+
+- 2 to take a picture, run
+
+  ```
+  python take_pic.py -n name
+  ```
+
+  press q to take a picture, it will only capture 1 highest possibility face if more than 1 person appear in the camera
+
+- 3 or you can put any preexisting photo into the facebank directory, the file structure is as following:
+
+```
+- facebank/
+         name1/
+             photo1.jpg
+             photo2.jpg
+             ...
+         name2/
+             photo1.jpg
+             photo2.jpg
+             ...
+         .....
+    if more than 1 image appears in the directory, average embedding will be calculated
+```
+
+- 4 to start
+
+  ```
+  python face_verify.py 
+  ```
+
+- - -
+
+### 3.3 detect over video:
+
+```
+​```
+python infer_on_video.py -f [video file name] -s [save file name]
+​```
+```
+
+the video file should be inside the data/face_bank folder
+
+- Video Detection Demo [@Youtube](https://www.youtube.com/watch?v=6r9RCRmxtHE)
+
+### 3.4 Training:
+
+```
+​```
+python train.py -b [batch_size] -lr [learning rate] -e [epochs]
+
+# python train.py -net mobilefacenet -b 200 -w 4
+​```
+```
+
+## 4. References 
+
+- This repo is mainly inspired by [deepinsight/insightface](https://github.com/deepinsight/insightface) and [InsightFace_TF](https://github.com/auroua/InsightFace_TF)
+
+## PS
+
+- PRs are welcome, in case that I don't have the resource to train some large models like the 100 and 151 layers model
+- Email : treb1en@qq.com
