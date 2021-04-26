@@ -1,13 +1,5 @@
 pretrained
 __pycache__
-face_recognition/Output_models 
-output_models 
-Output_models 
-VN_celeb
-train.txt
-abc 
-face_recognition/config.py
-config.py
-faces_emore
-work_space
-dataset 
+place_models
+.vscode
+face_recognition

@@ -49,7 +49,6 @@ def load_bin(path, rootdir, transform, image_size=[112,112]):
         i += 1
         if i % 1000 == 0:
             print('loading bin', i)
-    print(data.shape)
     np.save(str(rootdir)+'_list', np.array(issame_list))
     return data, issame_list
 

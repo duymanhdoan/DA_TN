@@ -24,7 +24,9 @@ class face_learner(object):
         else:
             self.model = Backbone(conf.net_depth, conf.drop_ratio, conf.net_mode).to(conf.device)
             print('{}_{} model generated'.format(conf.net_mode, conf.net_depth))
-        
+        if conf.resume: 
+            self.load_state(conf)
+
         if not inference:
             self.milestones = conf.milestones
             self.loader, self.class_num = get_train_loader(conf)        
@@ -32,8 +34,6 @@ class face_learner(object):
             self.writer = SummaryWriter(log_dir = conf.log_path)
             self.step = 0
             self.head = Arcface(embedding_size=conf.embedding_size, classnum=self.class_num).to(conf.device)
-
-            print('two model heads generated')
 
             paras_only_bn, paras_wo_bn = separate_bn_paras(self.model)
             
@@ -48,52 +48,23 @@ class face_learner(object):
                                     {'params': paras_wo_bn + [self.head.kernel], 'weight_decay': 5e-4},
                                     {'params': paras_only_bn}
                                 ], lr = conf.lr, momentum = conf.momentum)
-            print(self.optimizer)
+            # print(self.optimizer)
 #             self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, patience=40, verbose=True)
-
-            print('optimizers generated')    
-            self.board_loss_every = len(self.loader)//10
-            self.evaluate_every = len(self.loader)//10
-            self.save_every = len(self.loader)//10
             
-            print(self.board_loss_every  , self.evaluate_every, self.save_every )
         else:
             self.threshold = conf.threshold
     
-    def save_state(self, conf, accuracy, to_save_folder=False, extra=None, model_only=False):
-        if to_save_folder:
-            save_path = conf.save_path
-        else:
-            save_path = conf.model_path
-        torch.save(
-            self.model.state_dict(), save_path /
-            ('model_{}_accuracy:{}_step:{}_{}.pth'.format(get_time(), accuracy, self.step, extra)))
-        if not model_only:
-            torch.save(
-                self.head.state_dict(), save_path /
-                ('head_{}_accuracy:{}_step:{}_{}.pth'.format(get_time(), accuracy, self.step, extra)))
-            torch.save(
-                self.optimizer.state_dict(), save_path /
-                ('optimizer_{}_accuracy:{}_step:{}_{}.pth'.format(get_time(), accuracy, self.step, extra)))
-    
-    def load_state(self, conf, fixed_str, from_save_folder=False, model_only=False):
-        if from_save_folder:
-            save_path = conf.save_path
-        else:
-            save_path = conf.model_path            
-        self.model.load_state_dict(torch.load(save_path/'model_{}'.format(fixed_str)))
-        if not model_only:
-            self.head.load_state_dict(torch.load(save_path/'head_{}'.format(fixed_str)))
-            self.optimizer.load_state_dict(torch.load(save_path/'optimizer_{}'.format(fixed_str)))
-        
-    def board_val(self, db_name, accuracy, best_threshold, roc_curve_tensor):
-        self.writer.add_scalar('{}_accuracy'.format(db_name), accuracy, self.step)
-        self.writer.add_scalar('{}_best_threshold'.format(db_name), best_threshold, self.step)
-        self.writer.add_image('{}_roc_curve'.format(db_name), roc_curve_tensor, self.step)
-#         self.writer.add_scalar('{}_val:true accept ratio'.format(db_name), val, self.step)
-#         self.writer.add_scalar('{}_val_std'.format(db_name), val_std, self.step)
-#         self.writer.add_scalar('{}_far:False Acceptance Ratio'.format(db_name), far, self.step)
-        
+    def save_state(self, conf, epochs, step = None, extra=None):
+        save_path = conf.save_model_path
+        if step !=None: 
+            torch.save(self.model.state_dict(), save_path /('epochs_{}_step{}.pth'.format(epochs, step)))
+        else: 
+            torch.save(self.model.state_dict(), save_path /('epochs_{}.pth'.format(epochs)))
+
+    def load_state(self, conf):
+        self.model.load_state_dict(torch.load(conf.pretrained_path,  map_location = conf.device))
+        print('load models done!\n')
+
     
     def find_lr(self,
                 conf,
@@ -156,10 +127,10 @@ class face_learner(object):
                 plt.plot(log_lrs[10:-5], losses[10:-5])
                 return log_lrs, losses    
 
-    def train(self, conf, epochs):
+    def train(self, conf):
         self.model.train()
         running_loss = 0.            
-        for e in range(epochs):
+        for e in range(conf.epochs):
             print('epoch {} started'.format(e))
             if e == self.milestones[0]:
                 self.schedule_lr()
@@ -178,20 +149,23 @@ class face_learner(object):
                 running_loss += loss.item()
                 self.optimizer.step()
                 
-                if self.step % self.board_loss_every == 0 and self.step != 0:
-                    loss_board = running_loss / self.board_loss_every
-                    self.writer.add_scalar('train_loss', loss_board, self.step)
-                    running_loss = 0.
-                
-                if self.step % self.evaluate_every == 0 and self.step != 0:
-                    eval(conf, self.model, self.writer, self.step)
-                    self.model.train()
-                if self.step % self.save_every == 0 and self.step != 0:
-                    self.save_state(conf)
+                if self.step != 0: 
+                    if self.step % conf.add_scalar_freq == 0:
+                        loss_board = running_loss / conf.add_scalar_freq
+                        print(loss.item())
+                        self.writer.add_scalar('Train_loss', loss.item(), self.step)
+                        running_loss = 0.
                     
+                    if self.step % conf.eval_every_checkpoint == 0:
+                        eval(conf, self.model, self.writer, self.step, e)
+                        self.model.train()
+
+                    if self.step % conf.save_checkpoint == 0:
+                        self.save_state(conf, e, self.step)
+                        
                 self.step += 1
                 
-        self.save_state(conf, accuracy, to_save_folder=True, extra='final')
+        self.save_state(conf, e, step=None,to_save_folder=True, extra='final')
 
     def schedule_lr(self):
         for params in self.optimizer.param_groups:                 
