@@ -5,4 +5,4 @@ import args
 
 if __name__ == '__main__':
     learner = face_learner(args)
-    learner.train(args, args.epochs)
+    learner.train(args)
