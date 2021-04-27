@@ -1,5 +1,5 @@
-pretrained
 __pycache__
-place_models
-.vscode
 face_recognition
+config.py
+place_models
+args.py 

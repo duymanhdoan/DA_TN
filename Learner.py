@@ -56,6 +56,8 @@ class face_learner(object):
     
     def save_state(self, conf, epochs, step = None, extra=None):
         save_path = conf.save_model_path
+        if not save_path.exists(): 
+            save_path.mkdir()
         if step !=None: 
             torch.save(self.model.state_dict(), save_path /('epochs_{}_step{}.pth'.format(epochs, step)))
         else: 
