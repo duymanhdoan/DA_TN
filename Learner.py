@@ -152,7 +152,6 @@ class face_learner(object):
                 if self.step != 0: 
                     if self.step % conf.add_scalar_freq == 0:
                         loss_board = running_loss / conf.add_scalar_freq
-                        print(loss.item())
                         self.writer.add_scalar('Train_loss', loss.item(), self.step)
                         running_loss = 0.
                     

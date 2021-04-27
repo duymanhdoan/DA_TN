@@ -40,6 +40,7 @@ def eval(conf, model, writer, step, epochs):
     for row in pretty_tabel: 
         f.write(row.get_string())
     f.close()
+    f.write('\n')
 
 def embedding_ex(conf, carray, issame, model, nrof_folds = 5, tta = False):
     model.eval()
