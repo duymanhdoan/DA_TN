@@ -5,10 +5,8 @@ from torch.nn import CrossEntropyLoss
 from torchvision import transforms as trans
 
 
-
-
-data_root = Path('/home/minglee/Documents/DA_TN/place_models')
-work_path = Path('/home/minglee/Documents/DA_TN/place_models/output_models/')
+data_root = Path('/home/duydm/Documents/DA_TN/place_models')
+work_path = Path('/home/duydm/Documents/DA_TN/place_models/Output_models')
 model_path = work_path/'models'
 log_path = work_path/'tensorboard'
 save_model_path = work_path/'save_pretrained'
@@ -36,11 +34,11 @@ lr = 1e-3
 resume = True
 add_scalar_freq = 1 
 save_checkpoint = 10000 
-eval_every_checkpoint = 10000
+eval_every_checkpoint = 1
 milestones = [12,15,18]
 momentum = 0.9
 pin_memory = True
-pretrained_path = '/home/minglee/Documents/DA_TN/place_models/pretrained/model_ir_se50.pth'
+pretrained_path = '/home/duydm/Documents/DA_TN/place_models/pretrained/insightface_pretrain/model_ir_se50.pth'
 #--------------------Inference Config ------------------------
 
 acebank_path = work_path/'facebank'
@@ -50,8 +48,8 @@ face_limit = 10
 min_face_size = 30 
         # the larger this value, the faster deduction, comes with tradeoff in small faces
 #________________________ evaluate dataset _________________________________ 
-eval_dataset = Path('/home/minglee/Documents/DA_TN/place_models/dataset')
+eval_dataset = Path('/home/duydm/Documents/DA_TN/place_models/dataset')
 list_name_eval = ['agedb_30']
-# list_name_eval = [ 'lfw', 'cplfw' ,'cfp_fp' ,'cfp_ff' ,'calfw' ,'agedb_30','vgg2_fp']
+#list_name_eval = [ 'lfw', 'cplfw' ,'cfp_fp' ,'cfp_ff' ,'calfw' ,'agedb_30','vgg2_fp']
 
-result_eval_file = '/home/minglee/Documents/DA_TN/place_models/result_eval.txt'
+result_eval_file = '/home/duydm/Documents/DA_TN/place_models/result_eval.txt'
