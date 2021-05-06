@@ -2,4 +2,10 @@ __pycache__
 face_recognition
 config.py
 place_models
+<<<<<<< HEAD
+.vscode
+face_recognition
+database
+=======
 args.py 
+>>>>>>> fd75b7c40d1c0b84b2da1d4304da72699691bc0d
