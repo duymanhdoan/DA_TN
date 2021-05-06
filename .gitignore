@@ -1,4 +1,11 @@
 __pycache__
+<<<<<<< HEAD
 place_models
 face_recognition
 database    
+=======
+face_recognition
+place_models
+database
+outcome_train_models
+>>>>>>> 6c180987945edd4e14f400efab5ee456a6fcc9f2
