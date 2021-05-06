@@ -39,7 +39,9 @@ def eval(conf, model, writer, step, epochs):
     f = open(conf.result_eval_file, "a") 
     for row in pretty_tabel: 
         f.write(row.get_string())
+    f.write('\n')
     f.close()
+    
 
 def embedding_ex(conf, carray, issame, model, nrof_folds = 5, tta = False):
     model.eval()
@@ -51,7 +53,7 @@ def embedding_ex(conf, carray, issame, model, nrof_folds = 5, tta = False):
             if tta:
                 fliped = hflip_batch(batch)
                 emb_batch = model(batch.to(conf.device)) + model(fliped.to(conf.device))
-                embeddings[idx:idx + conf.batch_size] = l2_norm(emb_batch)
+                embeddings[idx:idx + conf.batch_size] = l2_norm(emb_batch.cpu())
             else:
                 embeddings[idx:idx + conf.batch_size] = model(batch.to(conf.device)).cpu()
             idx += conf.batch_size
@@ -60,7 +62,7 @@ def embedding_ex(conf, carray, issame, model, nrof_folds = 5, tta = False):
             if tta:
                 fliped = hflip_batch(batch)
                 emb_batch = model(batch.to(conf.device)) + model(fliped.to(conf.device))
-                embeddings[idx:] = l2_norm(emb_batch)
+                embeddings[idx:] = l2_norm(emb_batch.cpu())
             else:
                 embeddings[idx:] = model(batch.to(conf.device)).cpu()
     tpr, fpr, accuracy, best_thresholds = evaluate(embeddings, issame, nrof_folds)

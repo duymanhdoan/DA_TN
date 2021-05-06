@@ -30,7 +30,7 @@ def get_train_dataset(imgs_folder, image_shape):
 def get_train_loader(conf):
  
     ds, class_num = get_train_dataset(conf.emore_folder/'imgs', conf.input_size)
-    loader = DataLoader(ds, batch_size=conf.batch_size, shuffle=True, pin_memory=conf.pin_memory, drop_last=False,num_workers=conf.num_workers)
+    loader = DataLoader(ds, batch_size=conf.batch_size, shuffle=True, pin_memory=conf.pin_memory, drop_last=True,num_workers=conf.num_workers)
     
     print('class number of dataset',class_num)
     return loader, class_num 
