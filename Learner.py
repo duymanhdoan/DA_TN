@@ -9,8 +9,8 @@ from tensorboardX import SummaryWriter
 from matplotlib import pyplot as plt
 plt.switch_backend('agg')
 from utils import get_time, gen_plot, hflip_batch, separate_bn_paras
-from PIL import Image
 from torchvision import transforms as trans
+from PIL import Image
 import math
 import bcolz
 from test_eval import eval
@@ -56,8 +56,6 @@ class face_learner(object):
     
     def save_state(self, conf, epochs, step = None, extra=None):
         save_path = conf.save_model_path
-        if not save_path.exists(): 
-            save_path.mkdir()
         if step !=None: 
             torch.save(self.model.state_dict(), save_path /('epochs_{}_step{}.pth'.format(epochs, step)))
         else: 
@@ -154,6 +152,7 @@ class face_learner(object):
                 if self.step != 0: 
                     if self.step % conf.add_scalar_freq == 0:
                         loss_board = running_loss / conf.add_scalar_freq
+                        print(loss.item())
                         self.writer.add_scalar('Train_loss', loss.item(), self.step)
                         running_loss = 0.
                     
@@ -166,7 +165,7 @@ class face_learner(object):
                         
                 self.step += 1
                 
-        self.save_state(conf, e, step=None,extra='final')
+        self.save_state(conf, e, step=None,to_save_folder=True, extra='final')
 
     def schedule_lr(self):
         for params in self.optimizer.param_groups:                 

@@ -11,8 +11,8 @@ class VideoCamera(object):
         # from a webcam, comment the line below out and use a video file
         # instead.
         self.video = cv2.VideoCapture(0)
-        self.checker = FaceRecognize(args)
-        self.targets , self.names = self.checker.update_facedb(args)
+        # self.checker = FaceRecognize(args)
+        # self.targets , self.names = self.checker.update_facedb(args)
         # If you decide to use video.mp4, you must have this file in the folder
         # as the main.py.
         # self.video = cv2.VideoCapture('video.mp4')
@@ -21,11 +21,14 @@ class VideoCamera(object):
         self.video.release()
     
     def get_frame(self):
-        success, image = self.video.read()
-        if success:
-            image = self.checker.face_recognize(image, args, self.targets, self.names)
-        ret, jpeg = cv2.imencode('.jpg', image)
-        return jpeg.tobytes()
+        try:
+            success, image = self.video.read()
+            # if success:
+            #     image = self.checker.face_recognize(image, args, self.targets, self.names)
+            ret, jpeg = cv2.imencode('.jpg', image)
+            return jpeg.tobytes()
+        except: 
+            return None
             # print(type(image))
         # We are using Motion JPEG, but OpenCV defaults to capture raw images,
         # so we must encode it into JPEG in order to correctly display the
