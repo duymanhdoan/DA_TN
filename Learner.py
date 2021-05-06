@@ -166,7 +166,7 @@ class face_learner(object):
                         
                 self.step += 1
                 
-        self.save_state(conf, e, step=None,to_save_folder=True, extra='final')
+        self.save_state(conf, e, step=None,extra='final')
 
     def schedule_lr(self):
         for params in self.optimizer.param_groups:                 
